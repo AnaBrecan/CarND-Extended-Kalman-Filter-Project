@@ -108,8 +108,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     // first measurement
     cout << "EKF: " << endl;
-    ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 1, 1, 1, 1;
+    //ekf_.x_ = VectorXd(4);
+    //ekf_.x_ << 0, 0, 0, 0;
 
     previous_timestamp_ = measurement_pack.timestamp_;
     
@@ -122,15 +122,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       auto x_4 = measurement_pack.raw_measurements_[2] * sin(measurement_pack.raw_measurements_[1]); 
       ekf_.x_ << x_1, x_2, x_3, x_4;
       
-      ekf_.R_ = R_radar_;
-      Hj_ = tools.CalculateJacobian(ekf_.x_);
-      ekf_.H_ = Hj_;
-
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       // TODO: Initialize state.
-      ekf_.R_ = R_laser_;
-      ekf_.H_ = H_laser_;
       // set the state with the initial location and zero velocity
       ekf_.x_ << measurement_pack.raw_measurements_[0], 
                  measurement_pack.raw_measurements_[1], 
@@ -190,10 +184,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // TODO: Radar updates
     Hj_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.H_ = Hj_;
+    ekf_.R_ = R_radar_;
+    
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 
   } else {
     // TODO: Laser updates
+    ekf_.R_ = R_laser_;
+    ekf_.H_ = H_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
 
   }
