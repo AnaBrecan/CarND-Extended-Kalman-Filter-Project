@@ -74,7 +74,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
       throw std::runtime_error("Math error: Attempted to divide by Zero\n");
     }
     auto x_1 = sqrt(c);
-    auto x_2 = atan(py/px);
+    auto x_2 = atan2(py,px);
     auto x_3 = (px*vx + py*vy)/x_1;
     
     while (x_2 < -M_PI){
@@ -92,6 +92,15 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     }
   
   y = z - x_polar;
+  //normalize the angle to lie between -pi and pi
+  while (y(1) < -M_PI){
+      y(1) += 2.0*M_PI;
+    }
+    
+    while (y(1) > M_PI){ 
+      y(1) -= 2.0*M_PI; 
+    }
+    
   S = H_*P_*(H_.transpose()) + R_;
   K = P_*(H_.transpose())*(S.inverse());
     
